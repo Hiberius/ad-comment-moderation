@@ -1,20 +1,69 @@
-# Ad Comment Moderation
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/hero-light.svg">
+    <img alt="Ad Comment Moderation: an Agent Skill with a rule engine for hiding spam and scam comments under Facebook and Instagram ads" src="assets/hero-dark.svg" width="100%">
+  </picture>
+</p>
 
-**An Agent Skill for the comments under your Facebook and Instagram ads. A rule engine
-that states a reason for every verdict, keeps honest criticism visible, and tells you
-where the comments on a dark post actually live.**
+<h1 align="center">Ad Comment Moderation</h1>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-2ea44f.svg)](LICENSE)
-![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-3776AB?logo=python&logoColor=white)
-![Zero dependencies](https://img.shields.io/badge/dependencies-0-6E56CF)
+<p align="center"><b>Moderate the comments under your Facebook and Instagram ads with a rule engine that states a reason for every verdict, keeps honest criticism visible, and resolves where the comments on a dark post actually live.</b></p>
 
-```bash
-npx skills add Hiberius/ad-comment-moderation
-```
+<p align="center">
+<a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-2ea44f.svg"></a>
+  <img alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8%2B-3776AB?logo=python&logoColor=white">
+  <img alt="Zero dependencies" src="https://img.shields.io/badge/dependencies-0-6E56CF">
+  <img alt="No network calls" src="https://img.shields.io/badge/network-never-8f9bb8">
+  <img alt="40 tests" src="https://img.shields.io/badge/tests-40%20passing-2ea44f">
+</p>
+
+<p align="center">
+  <code>npx skills add Hiberius/ad-comment-moderation</code>
+</p>
+
+<p align="center">
+  <sub>Works with Claude Code, Claude Desktop, Codex, Cursor, Windsurf, OpenClaw and
+  anything else that reads a <code>SKILL.md</code>.</sub>
+</p>
 
 ---
 
+
 ## It decides, it does not just delete
+
+Most "hide Facebook comments" scripts hide everything new. That buries genuine questions
+and honest criticism along with the spam, which is why the category has the reputation it
+has.
+
+Under a lead-gen ad this is not cosmetic. Link drops send your paid traffic to a
+competitor, scam replies impersonate you to people who just gave you their number, and
+both sit under the ad for as long as it runs.
+
+## What it does
+
+| Command | What you get |
+|---|---|
+| `test` | A dry run over one comment or a CSV of them, with the deciding rule and its reason |
+| `rules` | The starter rule set as JSON, ready to edit |
+| `explain` | Every rule that ran, in order, and why each one did or did not match |
+
+Seven rule kinds — `keyword`, `regex`, `link`, `contact`, `emoji_spam`, `min_length`,
+`author_allow` — each with an action (`hide`, `flag`, `allow`) and a priority.
+
+
+## How it works inside
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/diagram-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/diagram-light.svg">
+    <img alt="How ad comment moderation works: resolve the ad to its page post, then run allow rules first and the seven rule kinds in priority order" src="assets/diagram-dark.svg" width="100%">
+  </picture>
+</p>
+
+
+## Every verdict states a reason
 
 ```bash
 python3 scripts/modrules.py test comments.csv
@@ -26,11 +75,8 @@ WOULD HIDE             🔥🔥🔥🔥🔥🔥🔥
                        Emoji flooding: carries 7 emoji, threshold 6
 WOULD HIDE             check my profile
                        Known spam and scam phrases: matched the term 'check my profile'
-WOULD HIDE             Chiamami al +39 333 1234567
-                       Contact details: contains a phone number
 WOULD KEEP             Honestly the last bag was stale and shipping took nine days.
 WOULD KEEP             Servizio PESSIMO non comprate qui
-WOULD KEEP             Quanto costa la spedizione in Sicilia?
 
 10 comment(s): 6 would be hidden, 4 kept
 This is a dry run. Nothing was sent anywhere.
@@ -38,21 +84,6 @@ This is a dry run. Nothing was sent anywhere.
 
 The two complaints stay visible. No rule matches them, and a moderation tool has no
 business hiding a comment it cannot give a reason for.
-
-```bash
-python3 scripts/modrules.py explain "Servizio PESSIMO non comprate qui"
-```
-```
-verdict   WOULD KEEP
-reason    no rule matched
-
-rules evaluated, in the order they ran:
-    -   Links
-    -   Contact details
-    -   Known spam and scam phrases
-    -   Emoji flooding
-    -   Empty or single-character comments
-```
 
 ## Where ad comments actually live
 
@@ -69,12 +100,8 @@ the same creative are a separate thread reached through the Instagram media id.
 
 ## Allow rules run first, always
 
-Seven rule kinds — `keyword`, `regex`, `link`, `contact`, `emoji_spam`, `min_length`,
-`author_allow` — each with an action (`hide`, `flag`, `allow`) and a priority.
-
-Allow rules are evaluated before everything else. An allow list that can be outranked by a
-higher-priority hide rule is not an allow list, and this ordering is why a customer cannot
-be hidden by a rule someone added in a hurry.
+An allow list that can be outranked by a higher-priority hide rule is not an allow list.
+This ordering is why a customer cannot be hidden by a rule someone added in a hurry.
 
 ## Dry run, then flag, then hide
 
@@ -82,22 +109,50 @@ be hidden by a rule someone added in a hurry.
 run for a day on real comments, read what it caught, and only then switch it to `hide`.
 Skipping that is how a moderation tool hides its first customer.
 
-## Documentation
-
-- [`SKILL.md`](SKILL.md) — the skill itself, what the agent reads
-- [`references/rule-design.md`](references/rule-design.md) — the seven kinds, ordering, tuning for lead gen, competitor poaching and impersonation rules, false positive discipline
-- [`references/meta-graph-comments.md`](references/meta-graph-comments.md) — dark posts, hide vs delete, pagination, rate limits, token handling, comments as untrusted input
-
 ## A working implementation
 
 [CommentHide](https://github.com/Hiberius/commenthide-facebook-comment-moderation) is the
 full thing: a single Cloudflare Worker with D1, a dashboard, a dry-run inspector and
 one-click undo, MIT. This skill is the reasoning behind it, usable on any stack.
 
-## Not for burying criticism
 
-The starter rules keep unhappy customers visible on purpose. Hiding them does not work
-either: they escalate, screenshot, and post again somewhere you cannot reach.
+## Documentation
+
+- [`SKILL.md`](SKILL.md) — the skill itself, what the agent reads
+- [`references/rule-design.md`](references/rule-design.md) — the seven kinds, ordering, tuning for lead gen, competitor poaching, false positive discipline
+- [`references/meta-graph-comments.md`](references/meta-graph-comments.md) — dark posts, hide against delete, pagination, rate limits, token handling
+
+
+## Related skills
+
+- **[whatsapp-receptionist-builder](https://github.com/Hiberius/whatsapp-receptionist-builder)** — the other side of a Meta presence: the conversation
+- **[invisible-text-forensics](https://github.com/Hiberius/invisible-text-forensics)** — what can be hidden inside a comment you feed to a model
+- **[cpa-profit-ops](https://github.com/Hiberius/cpa-profit-ops)** — the campaigns whose comments these are
+
+All ten in one install:
+
+```
+/plugin marketplace add Hiberius/hiberius-skills
+```
+
+
+## Work with me
+
+I build the systems these skills came out of: performance marketing infrastructure,
+lead pipelines, ad account tooling, internal automation, and products on the Cloudflare
+edge stack. If you need something like this built properly, I take on freelance and
+contract work.
+
+**[Christian Calabro — github.com/Hiberius](https://github.com/Hiberius)**
+
+Performance marketing · media buying · TypeScript · Cloudflare Workers · Next.js · Python
+
+---
+
+## Contributing
+
+Issues and pull requests welcome. The rule for a change to the skill itself: it has to
+be something you learned by getting it wrong once, not something you read in the docs.
 
 ## License
 
